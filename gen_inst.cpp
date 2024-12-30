@@ -143,19 +143,21 @@ void read_from_file(){
 }
 
 void connectGraph(){
-    int size, num;
+    int size;
+    //int num;
     for(unordered_map<string, Vertex>::iterator it1 = graph.begin(); it1 != graph.end(); it1++){
         for(unordered_map<string, Vertex>::iterator it2 = graph.begin(); it2 != graph.end(); it2++){
             if(it1 != it2){
                 size = it1->first.size();
-                num = size;
-                if(num > it2->first.size()) num = it2->first.size();
+                //num = size;
+                //if(num > it2->first.size()) num = it2->first.size();
                 for(int i = 0; i < size; i++){
                     if(it1->first.substr(size - i - 1, i + 1) == it2->first.substr(0, i + 1)){
                         it1->second.adjacency_list.insert(make_pair(i + 1, &it2->second));
                     }
                 }  
                 if(it1->first.substr(0, size - 1).contains(it2->first)){
+                    //indeks do ustalenia
                     it1->second.adjacency_list.insert(make_pair(0, &it2->second));
                 } 
             }
