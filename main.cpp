@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <random>
 #include <algorithm>
-
+#include <string>
 using namespace std;
 
 struct Vertex {
@@ -13,20 +13,21 @@ struct Vertex {
 
 struct Input {
     string dna;
-    int length = 400;
-    int k = 8;
-    int delta = 2;
-    int positive_error = 0;
-    int negative_error = 0;
+    int length = 12;
+    int k = 4;
+    int delta = 1;
+    int positive_error = 1;
+    int negative_error = 1;
     bool probable_positive_error = false;
     bool rep_allowed = true;
 };
 
+Input base_input;
 Input input;
 
 //Mapa odpowiadająca za nasz graf
 unordered_map<string, Vertex> graph;
-Vertex Head;
+Vertex* Head;
 
 string generateDNA(int length) {
     string dna;
@@ -166,9 +167,149 @@ void printSpectrum(){
 
 
 
-int main() {
-srand(time(nullptr));
-    graph = generateSpectrum();
-    cout<<input.dna<<endl;
-    printSpectrum();
+// O(k*n^2)
+void connectGraph(){
+    int size;
+    //int num;
+    for(unordered_map<string, Vertex>::iterator it1 = graph.begin(); it1 != graph.end(); it1++){
+        for(unordered_map<string, Vertex>::iterator it2 = graph.begin(); it2 != graph.end(); it2++){
+            if(it1 != it2){
+                size = it1->first.size();
+                //num = size;
+                //if(num > it2->first.size()) num = it2->first.size();
+                for(int i = 0; i < size; i++){
+                    if(it1->first.substr(size - i - 1, i + 1) == it2->first.substr(0, i + 1)){
+                        it1->second.adjacency_list.insert(make_pair(i + 1, &it2->second));
+                    }
+                }
+                if(it1->first.substr(0, size - 1).find(it2->first) != std::string::npos){
+                    //indeks do ustalenia
+                    it1->second.adjacency_list.insert(make_pair(0, &it2->second));
+                }
+            }
+        }
+    }
 }
+
+void Menu() {
+    string u_input;
+    string temp_input;
+    int i_input;
+
+    cout << "WYBIERZ OPCJE:" << endl;
+    cout << "1. Generator instancji" << endl;
+    cout << "2. Algorytm Naiwny" << endl;
+    cout << "3. Metaheurystyka" << endl;
+
+    cin >> i_input;
+    cin.ignore(); // Oczyszczenie bufora po wprowadzeniu pierwszej opcji
+
+    switch (i_input) {
+        case 1: {
+            cout << "WYBIERZ OPCJE GENERATORA INSTANCJI:" << endl;
+            cout << "1. Wczytaj z pliku" << endl;
+            cout << "2. Generuj recznie" << endl;
+
+            cin >> i_input;
+            cin.ignore(); // Oczyszczenie bufora po wprowadzeniu drugiej opcji
+
+            switch (i_input) {
+                case 1:
+                    cout << "Wczytaj DNA z pliku" << endl;
+                    // Kod do wczytywania DNA z pliku
+                    cout << "WCZYTANO Z PLIKU" << endl;
+                    break;
+
+                case 2: {
+                    cout << "Generuj recznie" << endl;
+
+                    cout << "Dlugosc DNA:" << endl;
+                    getline(cin, temp_input); // Odczyt danych
+                    if (!temp_input.empty()) {
+                        input.length = stoi(temp_input);
+                    }
+
+                    cout << "Dlugosc podciagow DNA:" << endl;
+                    getline(cin, temp_input); // Odczyt danych
+                    if (!temp_input.empty()) {
+                        input.k = stoi(temp_input);
+                    }
+
+                    cout << "Wartosc delta_k:" << endl;
+                    getline(cin, temp_input); // Odczyt danych
+                    if (!temp_input.empty()) {
+                        input.delta = stoi(temp_input);
+                    }
+
+                    cout << "Czy maja byc bledy negatywne wynikajace z powtorzen? Tak/Nie" << endl;
+                    getline(cin, temp_input); // Odczyt danych
+                    if (!temp_input.empty()) {
+                        input.rep_allowed = (temp_input == "Tak");
+                    }
+
+                    cout << "Ile ma byc bledow negatywnych nie wynikajacych z powtorzen?" << endl;
+                    getline(cin, temp_input); // Odczyt danych
+                    if (!temp_input.empty()) {
+                        input.negative_error = stoi(temp_input);
+                    }
+
+                    cout << "Ile ma byc bledow pozytywnych?" << endl;
+                    getline(cin, temp_input); // Odczyt danych
+                    if (!temp_input.empty()) {
+                        input.positive_error = stoi(temp_input);
+                    }
+
+                    cout << "Czy bledy pozytywne maja byc prawdopodobne? Tak/Nie" << endl;
+                    getline(cin, temp_input); // Odczyt danych
+                    if (!temp_input.empty()) {
+                        input.probable_positive_error = (temp_input == "Tak");
+                    }
+
+                    graph = generateSpectrum();
+                    break;
+                }
+
+                default:
+                    cout << "Nieprawidlowa opcja." << endl;
+                    break;
+            }
+            break;
+        }
+
+        case 2:
+            cout << "Algorytm Naiwny" << endl;
+            // Kod dla algorytmu naiwnego
+            break;
+
+        case 3:
+            cout << "Metaheurystyka" << endl;
+            // Kod dla metaheurystyki
+            break;
+
+        default:
+            cout << "Nieprawidlowa opcja" << endl;
+            break;
+    }
+}
+
+
+
+
+
+int main() {
+    srand(time(nullptr));
+    Menu();
+    printSpectrum();
+    connectGraph();
+    cout << endl << endl;
+    for(unordered_map<string, Vertex>::iterator i = graph.begin(); i != graph.end(); i++){
+        cout << i->first << " => ";
+        for(multimap<int, Vertex*>::iterator ii = i->second.adjacency_list.begin(); ii != i->second.adjacency_list.end(); ii++){
+            cout << ii->second->oligo_nucleotide << "|" << ii->first << "   ";
+        }
+        cout << endl;
+    }
+}
+//CONNECT GRAPH
+//PROPABLE ERROR
+//RAND() wymienic
