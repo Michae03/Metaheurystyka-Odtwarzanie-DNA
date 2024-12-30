@@ -3,4 +3,5 @@ project(Heurystyka)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(Heurystyka main.cpp)
+add_executable(Heurystyka main.cpp
+)
